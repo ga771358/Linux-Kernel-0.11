@@ -137,7 +137,6 @@ void main(void)		/* This really IS void, no error here. */
 	hd_init();
 	floppy_init();
 	sti();
-	panic(""); 
 	move_to_user_mode();
 	if (!fork()) {		/* we count on this going ok */
 		init();
@@ -187,9 +186,10 @@ void init(void)
 		execve("/bin/sh",argv_rc,envp_rc);
 		_exit(2);
 	}
-	if (pid>0)
+	if (pid>0) 
 		while (pid != wait(&i))
 			/* nothing */;
+	
 	while (1) {
 		if ((pid=fork())<0) {
 			printf("Fork failed in init\r\n");
