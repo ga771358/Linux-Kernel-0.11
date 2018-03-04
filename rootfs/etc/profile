@@ -10,3 +10,4 @@ alias up='cd ..'
 
 export TERM PS1 PS2
 umask 066
+echo 'Hello 0656512!!'
