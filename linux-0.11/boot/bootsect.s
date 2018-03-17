@@ -24,7 +24,7 @@
 # read errors will result in a unbreakable loop. Reboot by hand. It
 # loads pretty fast by getting whole sectors at a time whenever possible.
 
-	.global _start, begtext, begdata, begbss, endtext, enddata, endbss
+	.global _start, load_setup, begtext, begdata, begbss, endtext, enddata, endbss
 	.text
 	begtext:
 	.data
@@ -62,12 +62,44 @@ go:	mov	%cs, %ax
 	mov	%ax, %ss
 	mov	$0xFF00, %sp		# arbitrary value >>512
 
+Read_keyboard:
+	mov	$0x00, %ah 	#get keyboard
+	int	$0x16
+	
+	mov	$0x0e, %ah 	#display the char on the screen
+	mov	$0x07, %bl 	#foreground color
+	int	$0x10	
+	
+	cmp	$0x31, %al	#asc 1
+	je	load_setup	
+	cmp	$0x32, %al	#asc 2
+	je	load_hello
+	jmp	Read_keyboard
+
+load_hello:
+	mov	$0x0000, %dx		# drive 0, head 0
+	mov	$0x0002, %cx		# sector 2, track 0, read position in the disk
+	mov	$0x0000, %bx		# relative address = 0
+	mov	$SYSSEG, %ax		# absolute address, put disk data in the memory, write position in the memory
+	mov	%ax, %es	
+	.equ    AX, 0x0200+1		# AH=02 read, and how many sectors
+	mov     $AX, %ax		# service 2, nr of sectors
+	int	$0x13			# read it
+	jnc	load_hello_ok		# ok - continue
+	mov	$0x0000, %dx
+	mov	$0x0000, %ax		# reset the diskette
+	int	$0x13
+	jmp	load_hello
+
+load_hello_ok:
+	ljmp	$SYSSEG, $0
+
+
 # load the setup-sectors directly after the bootblock.
 # Note that 'es' is already set up.
-
 load_setup:
 	mov	$0x0000, %dx		# drive 0, head 0
-	mov	$0x0002, %cx		# sector 2, track 0
+	mov	$0x0003, %cx		# sector 3, track 0
 	mov	$0x0200, %bx		# address = 512, in INITSEG
 	.equ    AX, 0x0200+SETUPLEN
 	mov     $AX, %ax		# service 2, nr of sectors
@@ -111,7 +143,6 @@ ok_load_setup:
 	mov	%ax, %es		# segment of 0x010000
 	call	read_it
 	call	kill_motor
-
 # After that we check which root-device to use. If the device is
 # defined (#= 0), nothing is done and the given device is used.
 # Otherwise, either /dev/PS0 (2,28) or /dev/at0 (2,8), depending
@@ -147,7 +178,7 @@ root_defined:
 #
 # in:	es - starting address segment (normally 0x1000)
 #
-sread:	.word 1+ SETUPLEN	# sectors read of current track
+sread:	.word 2+ SETUPLEN	# sectors read of current track
 head:	.word 0			# current head
 track:	.word 0			# current track
 
