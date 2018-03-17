@@ -24,7 +24,7 @@
 # read errors will result in a unbreakable loop. Reboot by hand. It
 # loads pretty fast by getting whole sectors at a time whenever possible.
 
-	.global _start, load_setup, begtext, begdata, begbss, endtext, enddata, endbss
+	.global _start, begtext, begdata, begbss, endtext, enddata, endbss
 	.text
 	begtext:
 	.data

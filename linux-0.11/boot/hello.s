@@ -17,7 +17,7 @@ _start:
     mov $0x1301, %ax        # write string, move cursor
     int $0x10
 end_hello:
-    ljmp $0x9000, $0
+    #ljmp $0x9000, $0
     jmp end_hello
  
 msg1:
