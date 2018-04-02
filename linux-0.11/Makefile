@@ -47,8 +47,8 @@ Image: boot/bootsect boot/setup tools/system boot/hello
 	@strip system.tmp
 	@objcopy -O binary -R .note -R .comment system.tmp tools/kernel
 	@tools/build.sh boot/bootsect boot/setup tools/kernel Image $(ROOT_DEV) boot/hello
-	@rm system.tmp
-	@rm tools/kernel -f
+	#@rm system.tmp
+	#@rm tools/kernel -f
 	@sync
 
 disk: Image
